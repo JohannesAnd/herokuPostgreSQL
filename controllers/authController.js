@@ -22,9 +22,9 @@ module.exports = ({ database }) => {
   const registerUser = (req, res) => {
     const name = req.body.name;
     const password = req.body.password;
-    console.log('doo', name, password);
+
     if (!name || !password) {
-      res.status(400).send('Must supply name and password');
+      return res.status(400).send('Must supply name and password');
     }
 
     const { passwordHash, salt } = sha512(password, genRandomString(16));
@@ -38,16 +38,47 @@ module.exports = ({ database }) => {
         res.status(200).send('OK');
       })
       .catch(err => {
-        console.log(err);
-        res.send(400).send(err);
+        res.status(400).send(err);
+      });
+  };
+
+  const loginUser = (req, res) => {
+    const name = req.body.name;
+    const password = req.body.password;
+
+    if (!name || !password) {
+      return res.status(400).send('Must supply name and password');
+    }
+
+    return database
+      .query('SELECT * from Users WHERE name=$1;', [name])
+      .then(response => {
+        if (
+          response.rows[0].password_hash ===
+          sha512(password, response.rows[0].salt).passwordHash
+        ) {
+          res.status(200).json({
+            success: true,
+            token: 'foo'
+          });
+        } else {
+          res
+            .status(401)
+            .send({ success: false, error: 'Wrong username or password' });
+        }
+      })
+      .catch(err => {
+        res
+          .status(400)
+          .send({ success: false, error: 'Wrong username or password' });
       });
   };
 
   const getUsers = (req, res) => {
     return database
-      .query('SELECT id, name from Users;')
+      .query('SELECT * from Users;')
       .then(users => {
-        res.status(200).json({ users: users.rows });
+        res.status(200).json(users.rows);
       })
       .catch(err => {
         console.log(err);
@@ -57,6 +88,7 @@ module.exports = ({ database }) => {
 
   return {
     registerUser,
+    loginUser,
     getUsers
   };
 };
