@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "cross-env PGUSER=postgres PGPASSWORD=admin PGDATABASE=mydb nodemon server.js"
+    "dev":
+      "cross-env DATABASE_URL=postgres://postgres:admin@localhost:5432/mydb nodemon server.js"
   },
   "author": "",
   "license": "ISC",
