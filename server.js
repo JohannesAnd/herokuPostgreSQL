@@ -1,23 +1,23 @@
 const express = require('express');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
 const { Client } = require('pg');
 
 const port = process.env.PORT || 8080;
 
-const client = new Client();
 const app = express();
 
-app.use(async (req, res, next) => {
-  await client.connect();
+app.use(morgan('dev'));
 
-  const response = await client.query('SELECT $1::text as message', [
-    'Hello world!'
-  ]);
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-  await client.end();
+require('./models')();
 
-  res.send(response);
-});
+const router = require('./router');
+
+app.use('/', router());
 
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Listening on port ${port}`);
 });
