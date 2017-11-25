@@ -39,11 +39,10 @@ function submitLoginForm(e) {
     })
   })
     .then(function(response) {
-      console.log(response);
       return response.json();
     })
     .then(function(token) {
-      console.log(token);
+      localStorage.setItem('myApp@token', token.token);
     })
     .catch(function(err) {
       console.log(err);

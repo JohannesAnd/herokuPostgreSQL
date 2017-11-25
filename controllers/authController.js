@@ -18,7 +18,7 @@ const sha512 = (password, salt) => {
   };
 };
 
-module.exports = ({ database }) => {
+module.exports = ({ database, jwt }) => {
   const registerUser = (req, res) => {
     const name = req.body.name;
     const password = req.body.password;
@@ -59,7 +59,7 @@ module.exports = ({ database }) => {
         ) {
           res.status(200).json({
             success: true,
-            token: 'foo'
+            token: jwt.generateToken({ ...response.rows[0] })
           });
         } else {
           res
@@ -68,6 +68,7 @@ module.exports = ({ database }) => {
         }
       })
       .catch(err => {
+        console.log(err);
         res
           .status(400)
           .send({ success: false, error: 'Wrong username or password' });
